@@ -106,7 +106,7 @@ EOF
         stage('Deploy') {
             steps {
                 script {
-                    sshagent(['DKUZMENKO_PANTHEON_GIT_KEY', 'DIGITAL_GH']) {
+                    sshagent(['DKUZMENKO_PANTHEON_GIT_KEY', 'DKUZMENKO_GH']) {
                         if (params.ENV == 'dev') {
                             sh """
                             git push pantheon HEAD:master
