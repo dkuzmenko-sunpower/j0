@@ -119,7 +119,7 @@ EOF
                             // Get the last tag and push the code to the next one
                             sync_content = params.CLONE_DATA ? "--sync_content" : ""
                             sh '''
-                            NEXT_TAG="pantheon_test_$[$(git tag | grep "^pantheon_test_" | sort -k1.15n | tail -1 | sed "s/^pantheon_test_//") + 1]"
+                            NEXT_TAG="pantheon_test_$(expr $(git tag | grep "^pantheon_test_" | sort -k1.15n | tail -1 | sed "s/^pantheon_test_//") + 1)"
                             git tag -a ${NEXT_TAG} -m "Deploying test release v${RELEASE}"
                             git push pantheon ${NEXT_TAG}
                             '''
@@ -135,7 +135,7 @@ EOF
                             sh '''
                             git tag -a v${RELEASE} -m "Release v${RELEASE}"
                             git push --tags
-                            NEXT_TAG="pantheon_live_$[$(git tag | grep "^pantheon_live_" | sort -k1.15n | tail -1 | sed "s/^pantheon_live_//") + 1]"
+                            NEXT_TAG="pantheon_live_$(expr $(git tag | grep "^pantheon_live_" | sort -k1.15n | tail -1 | sed "s/^pantheon_live_//") + 1)"
                             git tag -a ${NEXT_TAG} -m "Deploying test release v${RELEASE}"
                             git push pantheon ${NEXT_TAG}
                             '''
