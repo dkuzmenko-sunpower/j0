@@ -3,13 +3,13 @@
 
 def envMap = [
     'dev': [
-        slack_channels: ['sunpowercom'],
+        slack_channels: [],
     ],
     'test': [
-        slack_channels: ['sunpowercom'],
+        slack_channels: [],
     ],
     'live': [
-        slack_channels: ['sunpowercom', 'production_deployment'],
+        slack_channels: [],
     ]
 ]
 def pantheon_git_remote = 'ssh://codeserver.dev.fd1e6b38-95c9-4e74-a763-f990def9cdb1@codeserver.dev.fd1e6b38-95c9-4e74-a763-f990def9cdb1.drush.in:2222/~/repository.git'
@@ -112,8 +112,6 @@ EOF
                         if (params.ENV == 'dev') {
                             sh """
                             git push pantheon HEAD:master
-                            # Sleep 60 seconds to let Pantheon to sync the code.
-                            sleep 60
                             """
                         } else if (params.ENV == 'test') {
                             // Get the last tag and push the code to the next one
@@ -141,6 +139,8 @@ EOF
                             '''
                         }
                         sh """
+                        # Sleep 60 seconds to let Pantheon to sync the code.
+                        sleep 60
                         while true; do terminus env:clear-cache ${pantheon_site_name}.${params.ENV} && break || sleep 5; done
                         terminus drush ${pantheon_site_name}.${params.ENV} -- cc all
                         terminus drush ${pantheon_site_name}.${params.ENV} -- updb
