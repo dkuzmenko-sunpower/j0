@@ -40,17 +40,15 @@ pipeline {
                 expression { params.ENV == 'live' }
             }
             steps {
-                container('gcloud') {
-                    script {
-                        withCredentials([
-                            string(credentialsId: 'SERVICENOW_CLIENT_ID', variable: 'SERVICENOW_CLIENT_ID'),
-                            string(credentialsId: 'SERVICENOW_CLIENT_SECRET', variable: 'SERVICENOW_CLIENT_SECRET'),
-                            string(credentialsId: 'SERVICENOW_USERNAME', variable: 'SERVICENOW_USERNAME'),
-                            string(credentialsId: 'SERVICENOW_PASSWORD', variable: 'SERVICENOW_PASSWORD')
-                        ]) {
-                            //validateSNChangeNumber("${params.CHANGE_NUMBER}", "${SERVICENOW_CLIENT_ID}", "${SERVICENOW_CLIENT_SECRET}", "${SERVICENOW_USERNAME}", "${SERVICENOW_PASSWORD}")
-                            echo "Fake validate SN CN"
-                        }
+                script {
+                    withCredentials([
+                        string(credentialsId: 'SERVICENOW_CLIENT_ID', variable: 'SERVICENOW_CLIENT_ID'),
+                        string(credentialsId: 'SERVICENOW_CLIENT_SECRET', variable: 'SERVICENOW_CLIENT_SECRET'),
+                        string(credentialsId: 'SERVICENOW_USERNAME', variable: 'SERVICENOW_USERNAME'),
+                        string(credentialsId: 'SERVICENOW_PASSWORD', variable: 'SERVICENOW_PASSWORD')
+                    ]) {
+                        //validateSNChangeNumber("${params.CHANGE_NUMBER}", "${SERVICENOW_CLIENT_ID}", "${SERVICENOW_CLIENT_SECRET}", "${SERVICENOW_USERNAME}", "${SERVICENOW_PASSWORD}")
+                        echo "Fake validate SN CN"
                     }
                 }
             }
