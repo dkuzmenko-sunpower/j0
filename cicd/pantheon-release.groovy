@@ -35,7 +35,7 @@ pipeline {
         booleanParam(name: 'BACKUP_DATA', defaultValue: true, description: 'Backup Live site data: code, files and database. Should be enabled in common use.')
     }
     stages {
-        stage('Validate params') {
+        stage('Validate SN Change Number') {
             when {
                 expression { params.ENV == 'live' }
             }
@@ -54,6 +54,7 @@ pipeline {
                     }
                 }
             }
+        stage('Validate Parameters') {
             steps {
                 script {
                     if ( params.ENV != 'dev' && params.RELEASE == '' ) {
