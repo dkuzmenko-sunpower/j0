@@ -116,11 +116,11 @@ EOF
                         } else if (params.ENV == 'test') {
                             // Get the last tag and push the code to the next one
                             sync_content = params.CLONE_DATA ? "--sync_content" : ""
-                            sh """
+                            sh '''
                             NEXT_TAG="pantheon_test_$[$(git tag | grep "^pantheon_test_" | sort -k1.15n | tail -1 | sed "s/^pantheon_test_//") + 1]"
-                            git tag -a \${NEXT_TAG} -m "Deploying test release v${params.RELEASE}"
-                            git push pantheon \${NEXT_TAG}
-                            """
+                            git tag -a ${NEXT_TAG} -m "Deploying test release v${RELEASE}"
+                            git push pantheon ${NEXT_TAG}
+                            '''
                         } else if (params.ENV == 'live') {
                             // Get the last tag and push the code to the next one
                             if (params.BACKUP_DATA) {
@@ -130,13 +130,13 @@ EOF
                             } else {
                                 echo "Skipping the backup step."
                             }
-                            sh """
-                            git tag -a v${params.RELEASE} -m "Release v${params.RELEASE}"
+                            sh '''
+                            git tag -a v${RELEASE} -m "Release v${RELEASE}"
                             git push --tags
                             NEXT_TAG="pantheon_live_$[$(git tag | grep "^pantheon_live_" | sort -k1.15n | tail -1 | sed "s/^pantheon_live_//") + 1]"
-                            git tag -a \${NEXT_TAG} -m "Deploying test release v${params.RELEASE}"
-                            git push pantheon \${NEXT_TAG}
-                            """
+                            git tag -a ${NEXT_TAG} -m "Deploying test release v${RELEASE}"
+                            git push pantheon ${NEXT_TAG}
+                            '''
                         }
                         sh """
                         while true; do terminus env:clear-cache ${pantheon_site_name}.${params.ENV} && break || sleep 5; done
