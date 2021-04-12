@@ -97,7 +97,7 @@ EOF
                             terminus auth:login --machine-token=\${MACHINE_TOKEN}
                             ssh-keyscan -p ${pantheon_git_port} ${pantheon_git_host} >>~/.ssh/known_hosts
                             git remote add pantheon ${pantheon_git_remote}
-                            git fetch pantheon
+                            git fetch --tags pantheon
                            """
                     }
                 }
