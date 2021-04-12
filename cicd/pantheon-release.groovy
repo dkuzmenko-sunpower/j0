@@ -54,6 +54,7 @@ pipeline {
                     }
                 }
             }
+        }
         stage('Validate Parameters') {
             steps {
                 script {
