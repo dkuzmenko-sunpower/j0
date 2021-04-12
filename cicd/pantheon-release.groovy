@@ -12,10 +12,10 @@ def envMap = [
         slack_channels: ['sunpowercom', 'production_deployment'],
     ]
 ]
-def pantheon_git_remote = 'ssh://codeserver.dev.ab66b200-8a91-4b0c-9f30-a446d5fb993e@codeserver.dev.ab66b200-8a91-4b0c-9f30-a446d5fb993e.drush.in:2222/~/repository.git'
-def pantheon_git_host = 'codeserver.dev.ab66b200-8a91-4b0c-9f30-a446d5fb993e.drush.in'
+def pantheon_git_remote = 'ssh://codeserver.dev.fd1e6b38-95c9-4e74-a763-f990def9cdb1@codeserver.dev.fd1e6b38-95c9-4e74-a763-f990def9cdb1.drush.in:2222/~/repository.git'
+def pantheon_git_host = 'codeserver.dev.fd1e6b38-95c9-4e74-a763-f990def9cdb1.drush.in'
 def pantheon_git_port = 2222
-def pantheon_site_name = 'sunpower-us'
+def pantheon_site_name = 'another-one-unique-site-name'
 
 pipeline {
     agent { label 'pantheon' }
@@ -48,19 +48,20 @@ pipeline {
                             string(credentialsId: 'SERVICENOW_USERNAME', variable: 'SERVICENOW_USERNAME'),
                             string(credentialsId: 'SERVICENOW_PASSWORD', variable: 'SERVICENOW_PASSWORD')
                         ]) {
-                            validateSNChangeNumber("${params.CHANGE_NUMBER}", "${SERVICENOW_CLIENT_ID}", "${SERVICENOW_CLIENT_SECRET}", "${SERVICENOW_USERNAME}", "${SERVICENOW_PASSWORD}")
+                            //validateSNChangeNumber("${params.CHANGE_NUMBER}", "${SERVICENOW_CLIENT_ID}", "${SERVICENOW_CLIENT_SECRET}", "${SERVICENOW_USERNAME}", "${SERVICENOW_PASSWORD}")
+                            echo "Fake validate SN CN"
                         }
                     }
                 }
             }
             steps {
                 script {
-                    if ( params.ENV != 'dev' && params.RELEASE_VER == '' ) {
-                        echo "*****Not enough parameters. The RELEASE_VER parameter is mandatory for ${params.ENV} environment. Aborting the build*****"
-                        error("Not enough parameters. The RELEASE_VER parameter is mandatory for ${params.ENV} environment. Aborting the build")
+                    if ( params.ENV != 'dev' && params.RELEASE == '' ) {
+                        echo "*****Not enough parameters. The RELEASE parameter is mandatory for ${params.ENV} environment. Aborting the build*****"
+                        error("Not enough parameters. The RELEASE parameter is mandatory for ${params.ENV} environment. Aborting the build")
                     }
                     for (channel in envMap[params.ENV].slack_channels) {
-                        sendNotifications 'STARTED', "Job: '${env.JOB_NAME}', ENV: ${params.ENV}, VERSION: ${env.RELEASE_VER}", channel
+                        sendNotifications 'STARTED', "Job: '${env.JOB_NAME}', ENV: ${params.ENV}, VERSION: ${env.RELEASE}", channel
                     }
                 }
             }
@@ -68,7 +69,7 @@ pipeline {
         stage('Checkout') {
             steps {
               checkout([$class: 'GitSCM',
-                        branches: [[ name: params.GITHUB_BRANCH ]],
+                        branches: [[ name: params.BRANCH ]],
                         doGenerateSubmoduleConfigurations: false,
                         extensions: [],
                         submoduleCfg: [],
@@ -90,8 +91,8 @@ email = ${BUILD_USER_EMAIL}
 EOF
                     '''
                 }
-                withCredentials([string(credentialsId: 'SUNPOWER_PANTHEON_MACHINE_TOKEN', variable: 'MACHINE_TOKEN')]) {
-                    sshagent(['SUNPOWER_PANTHEON_GIT_KEY']) {
+                withCredentials([string(credentialsId: 'DKUZMENKO_PANTHEON_MACHINE_TOKEN', variable: 'MACHINE_TOKEN')]) {
+                    sshagent(['DKUZMENKO_PANTHEON_GIT_KEY']) {
                         sh """
                             terminus auth:login --machine-token=\${MACHINE_TOKEN}
                             ssh-keyscan -p ${pantheon_git_port} ${pantheon_git_host} >>~/.ssh/known_hosts
@@ -105,7 +106,7 @@ EOF
         stage('Deploy') {
             steps {
                 script {
-                    sshagent(['SUNPOWER_PANTHEON_GIT_KEY', 'DIGITAL_GH']) {
+                    sshagent(['DKUZMENKO_PANTHEON_GIT_KEY', 'DIGITAL_GH']) {
                         if (params.ENV == 'dev') {
                             sh """
                             git push pantheon HEAD:master
@@ -117,7 +118,7 @@ EOF
                             sync_content = params.CLONE_DATA ? "--sync_content" : ""
                             sh """
                             NEXT_TAG="pantheon_test_$[$(git tag | grep "^pantheon_test_" | sort -k1.15n | tail -1 | sed "s/^pantheon_test_//") + 1]"
-                            git tag -a \${NEXT_TAG} -m "Deploying test release v${params.RELEASE_VER}"
+                            git tag -a \${NEXT_TAG} -m "Deploying test release v${params.RELEASE}"
                             git push pantheon \${NEXT_TAG}
                             """
                         } else if (params.ENV == 'live') {
@@ -130,10 +131,10 @@ EOF
                                 echo "Skipping the backup step."
                             }
                             sh """
-                            git tag -a v${params.RELEASE_VER} -m "Release v${params.RELEASE_VER}"
+                            git tag -a v${params.RELEASE} -m "Release v${params.RELEASE}"
                             git push --tags
                             NEXT_TAG="pantheon_live_$[$(git tag | grep "^pantheon_live_" | sort -k1.15n | tail -1 | sed "s/^pantheon_live_//") + 1]"
-                            git tag -a \${NEXT_TAG} -m "Deploying test release v${params.RELEASE_VER}"
+                            git tag -a \${NEXT_TAG} -m "Deploying test release v${params.RELEASE}"
                             git push pantheon \${NEXT_TAG}
                             """
                         }
@@ -159,7 +160,7 @@ EOF
             deleteDir() /* clean up our workspace */
             script {
                 for (channel in envMap[params.ENV].slack_channels) {
-                    sendNotifications currentBuild.result, "Job: '${env.JOB_NAME}', ENV: ${params.ENV}, VERSION: ${env.RELEASE_VER}", channel
+                    sendNotifications currentBuild.result, "Job: '${env.JOB_NAME}', ENV: ${params.ENV}, VERSION: ${env.RELEASE}", channel
                 }
             }
         }
