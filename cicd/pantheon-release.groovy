@@ -137,8 +137,8 @@ EOF
                             '''
                         }
                         sh """
-                        # Sleep 60 seconds to let Pantheon to sync the code.
-                        sleep 60
+                        # Wait for the code sync
+                        terminus build:workflow:wait -- ${pantheon_site_name}.${partams.ENV}
                         while true; do terminus env:clear-cache ${pantheon_site_name}.${params.ENV} && break || sleep 5; done
                         terminus drush ${pantheon_site_name}.${params.ENV} -- cc all
                         terminus drush ${pantheon_site_name}.${params.ENV} -- updb
