@@ -138,7 +138,8 @@ EOF
                         }
                         sh """
                         # Wait for the code sync
-                        terminus build:workflow:wait -- ${pantheon_site_name}.${params.ENV}
+                        #terminus build:workflow:wait -- ${pantheon_site_name}.${params.ENV}
+                        sleep 60
                         while true; do terminus env:clear-cache ${pantheon_site_name}.${params.ENV} && break || sleep 5; done
                         terminus drush ${pantheon_site_name}.${params.ENV} -- cc all
                         terminus drush ${pantheon_site_name}.${params.ENV} -- updb
