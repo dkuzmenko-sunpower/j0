@@ -25,7 +25,7 @@ pipeline {
         timestamps()
     }
     parameters {
-        choice(name: 'ENV', choices: ['dev', 'test', 'live'], description: 'Pantheon Environment.')
+        choice(name: 'ENV', choices: ['dev', 'test', 'uat', 'live'], description: 'Pantheon Environment.')
         string(name: 'BRANCH', defaultValue: 'master', description: 'Branch to deploy.')
         string(name: 'CHANGE_NUMBER', defaultValue: '', description: 'ServiceNow Change Number (live env only).')
         string(name: 'RELEASE', defaultValue: '', description: 'Release version used in the Pantheon deploy message. Not used by dev environment.')
@@ -107,6 +107,7 @@ EOF
             steps {
                 script {
                     sshagent(['DKUZMENKO_PANTHEON_GIT_KEY', 'DKUZMENKO_GH']) {
+                    if (params.ENV != 'uat') {
                         if (params.ENV == 'dev') {
                             sh """
                             git push pantheon HEAD:master
@@ -140,7 +141,7 @@ EOF
                         sh """
                         # Wait for the code sync
                         terminus build:workflow:wait -- ${pantheon_site_name}.${params.ENV} '${workflow}'
-                        while true; do terminus env:clear-cache ${pantheon_site_name}.${params.ENV} && break || sleep 5; done
+                        terminus env:clear-cache ${pantheon_site_name}.${params.ENV}
                         terminus drush ${pantheon_site_name}.${params.ENV} -- cc all
                         terminus drush ${pantheon_site_name}.${params.ENV} -- updb
                         """
@@ -151,6 +152,19 @@ EOF
                             terminus drush ${pantheon_site_name}.${params.ENV} -- cc all
                             """
                         }
+                    } else {  // if (params.ENV == 'uat')
+                        try {
+                            sh """
+                            terminus multidev:delete --delete-branch -n -y -- ${pantheon_site_name}.${params.ENV}
+                            """
+                        } catch (err) {
+                            echo err.getMessage()
+                        }
+                        sh """
+                        git push pantheon HEAD:uat
+                        terminus multidev:create -n -y -- ${pantheon_site_name}.${params.ENV} live
+                        """
+                    }
                     }
                 }
             }
