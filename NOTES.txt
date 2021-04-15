@@ -5,3 +5,4 @@ The feature 4
 The feature 5
 The feature 6
 The feature 7
+HOTFIX
