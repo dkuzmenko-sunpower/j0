@@ -136,10 +136,10 @@ EOF
                             git push pantheon ${NEXT_TAG}
                             '''
                         }
-                        workflow = params.ENV in ['test', 'live'] ? "Deploy code to \\\"${params.ENV}\\\"" : "Sync code on \\\"${params.ENV}\\\""
+                        workflow = params.ENV in ['test', 'live'] ? "Deploy code to \"${params.ENV}\"" : "Sync code on \"${params.ENV}\""
                         sh """
                         # Wait for the code sync
-                        terminus build:workflow:wait -- ${pantheon_site_name}.${params.ENV} \"${workflow}\"
+                        terminus build:workflow:wait -- ${pantheon_site_name}.${params.ENV} '${workflow}'
                         while true; do terminus env:clear-cache ${pantheon_site_name}.${params.ENV} && break || sleep 5; done
                         terminus drush ${pantheon_site_name}.${params.ENV} -- cc all
                         terminus drush ${pantheon_site_name}.${params.ENV} -- updb
