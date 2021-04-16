@@ -8,6 +8,9 @@ def envMap = [
     'test': [
         slack_channels: [],
     ],
+    'uat': [
+        slack_channels: [],
+    ],
     'live': [
         slack_channels: [],
     ]
@@ -56,7 +59,7 @@ pipeline {
         stage('Validate Parameters') {
             steps {
                 script {
-                    if ( params.ENV != 'dev' && params.RELEASE == '' ) {
+                    if ( params.ENV in ['test', 'live'] && params.RELEASE == '' ) {
                         echo "*****Not enough parameters. The RELEASE parameter is mandatory for ${params.ENV} environment. Aborting the build*****"
                         error("Not enough parameters. The RELEASE parameter is mandatory for ${params.ENV} environment. Aborting the build")
                     }
