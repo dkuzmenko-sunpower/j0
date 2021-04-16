@@ -164,7 +164,7 @@ EOF
                             echo err.getMessage()
                         }
                         sh """
-                        git push pantheon HEAD:uat
+                        git push pantheon ${params.BRANCH}:uat
                         terminus multidev:create -n -y -- ${pantheon_site_name}.${params.ENV} live
                         """
                     }
