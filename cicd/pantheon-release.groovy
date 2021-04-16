@@ -165,7 +165,7 @@ EOF
                         }
                         sh """
                         git push pantheon HEAD:refs/heads/uat
-                        terminus multidev:create -n -y -- ${pantheon_site_name}.${params.ENV} live
+                        terminus multidev:create -n -y -- ${pantheon_site_name}.live ${params.ENV}
                         """
                     }
                     }
